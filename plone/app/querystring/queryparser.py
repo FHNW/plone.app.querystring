@@ -63,6 +63,8 @@ def _contains(context, row):
 def _equal(context, row):
     return {row.index: {'query': row.values, }}
 
+def _isNot(context, row):
+    return {row.index: {'not': row.values, }}
 
 def _isTrue(context, row):
     return {row.index: {'query': True, }}

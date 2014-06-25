@@ -18,7 +18,8 @@ class Subject(object):
     implements(IParsedQueryIndexModifier)
 
     def __call__(self, value):
-        query = value['query']
+        #query = value['query']
+        query = value.get('query', value.get('not'))
         # query can be a unicode string or a list of unicode strings.
         if isinstance(query, unicode):
             query = query.encode("utf-8")
@@ -36,5 +37,6 @@ class Subject(object):
             query = copy_of_query
         else:
             pass
-        value['query'] = query
+        #value['query'] = query
+        query = value.get('query', value.get('not'))
         return ('Subject', value)
