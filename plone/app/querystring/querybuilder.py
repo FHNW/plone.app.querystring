@@ -67,6 +67,13 @@ class QueryBuilder(BrowserView):
     def _makequery(self, query=None, batch=False, b_start=0, b_size=30,
                    sort_on=None, sort_order=None, limit=0, brains=False):
         """Parse the (form)query and return using multi-adapter"""
+        sorted_query = list()
+        for condition in query:
+            if condition.get('o')[-6:] == '.isNot':
+                sorted_query.insert(0, condition)
+            else:
+                sorted_query.append(condition)
+        query = sorted_query
         parsedquery = queryparser.parseFormquery(
             self.context, query, sort_on, sort_order)
 
@@ -81,7 +88,7 @@ class QueryBuilder(BrowserView):
                     del parsedquery[name]
                     parsedquery[new_name] = query
 
-       # Check for valid indexes
+        # Check for valid indexes
         catalog = getToolByName(self.context, 'portal_catalog')
         valid_indexes = [index for index in parsedquery
                          if index in catalog.indexes()]
