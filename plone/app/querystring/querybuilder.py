@@ -76,7 +76,6 @@ class QueryBuilder(BrowserView):
         query = sorted_query
         parsedquery = queryparser.parseFormquery(
             self.context, query, sort_on, sort_order)
-
         index_modifiers = getUtilitiesFor(IParsedQueryIndexModifier)
         for name, modifier in index_modifiers:
             if name in parsedquery:
@@ -87,7 +86,7 @@ class QueryBuilder(BrowserView):
                 if name != new_name:
                     del parsedquery[name]
                     parsedquery[new_name] = query
-
+        
         # Check for valid indexes
         catalog = getToolByName(self.context, 'portal_catalog')
         valid_indexes = [index for index in parsedquery
@@ -143,3 +142,4 @@ class RegistryConfiguration(BrowserView):
             (registry, self.request), IQuerystringRegistryReader)
         data = reader()
         return json.dumps(data)
+        

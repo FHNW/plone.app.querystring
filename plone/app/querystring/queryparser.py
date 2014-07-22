@@ -35,13 +35,18 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
         kwargs = {}
         parser = resolve(row.operator)
         kwargs = parser(context, row)
-
+        print 'kwargs: %s' % (kwargs)
+        
         # Special path handling - since multipath queries are possible
         if 'path' in query and 'path' in kwargs:
             query['path']['query'].extend(kwargs['path']['query'])
         else:
-            query.update(kwargs)
-
+            if 'Subject' in query:
+                if 'not' in query['Subject']:
+                    query['Subject']['query'] = kwargs['Subject']['query']
+            else:
+                query.update(kwargs)
+    print 'query in queryparser: %s' % (query)
     if not query:
         # If the query is empty fall back onto the equality query
         query = _equal(context, row)
@@ -63,8 +68,10 @@ def _contains(context, row):
 def _equal(context, row):
     return {row.index: {'query': row.values, }}
 
+
 def _isNot(context, row):
     return {row.index: {'not': row.values, }}
+
 
 def _isTrue(context, row):
     return {row.index: {'query': True, }}
