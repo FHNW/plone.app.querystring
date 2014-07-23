@@ -35,7 +35,6 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
         kwargs = {}
         parser = resolve(row.operator)
         kwargs = parser(context, row)
-        print 'kwargs: %s' % (kwargs)
         
         # Special path handling - since multipath queries are possible
         if 'path' in query and 'path' in kwargs:
@@ -46,7 +45,6 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
                     query['Subject']['query'] = kwargs['Subject']['query']
             else:
                 query.update(kwargs)
-    print 'query in queryparser: %s' % (query)
     if not query:
         # If the query is empty fall back onto the equality query
         query = _equal(context, row)
