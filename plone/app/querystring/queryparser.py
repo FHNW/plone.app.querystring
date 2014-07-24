@@ -24,7 +24,7 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
     for row in formquery:
         operator = row.get('o', None)
         function_path = reg["%s.operation" % operator]
-        
+
         # The functions expect this pattern of object, so lets give it to
         # them in a named tuple instead of jamming things onto the request
         row = Row(index=row.get('i', None),
@@ -34,12 +34,12 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
         kwargs = {}
         parser = resolve(row.operator)
         kwargs = parser(context, row)
-        
+
         # Special path handling - since multipath queries are possible
         if 'path' in query and 'path' in kwargs:
             query['path']['query'].extend(kwargs['path']['query'])
         else:
-            if operator == 'plone.app.querystring.operation.selection.isNot':
+            if operator == 'plone.app.querystring.operation.selection.is' and row.index == 'Subject':
                 if 'Subject' in query:
                     query['Subject']['query'] = kwargs['Subject']['query']
             else:
