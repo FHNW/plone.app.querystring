@@ -34,14 +34,16 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
         kwargs = {}
         parser = resolve(row.operator)
         kwargs = parser(context, row)
-
         # Special path handling - since multipath queries are possible
         if 'path' in query and 'path' in kwargs:
             query['path']['query'].extend(kwargs['path']['query'])
         else:
-            if operator == 'plone.app.querystring.operation.selection.is' and row.index == 'Subject':
+            #query.update(kwargs)
+            if row.operator == u'plone.app.querystring.queryparser._equal' and row.index == 'Subject':
                 if 'Subject' in query:
                     query['Subject']['query'] = kwargs['Subject']['query']
+                else:
+                    query.update(kwargs)
             else:
                 query.update(kwargs)
     if not query:
