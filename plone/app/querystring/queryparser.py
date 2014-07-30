@@ -32,18 +32,13 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
                 rdict['v'].extend(row.get('v'))
             mquery.append(rdict)
         else:
-            o_in_mquery = -1
-            counter = 0
             for mrow in mquery:
                 if row.get('i') == mrow.get('i'):
                     if row.get('o') == mrow.get('o'):
-                        o_in_mquery = counter
-                counter +=1  
-            if o_in_mquery > -1:
-                if type(row.get('v')) is str:
-                    mquery[o_in_mquery]['v'].append(row.get('v'))
-                elif type(row.get('v')) is list:
-                    mquery[o_in_mquery]['v'].extend(row.get('v'))
+                        if type(row.get('v')) is str:
+                            mrow['v'].append(row.get('v'))
+                        elif type(row.get('v')) is list:
+                            mrow['v'].extend(row.get('v'))
             else:
                 rdict = {'i': row.get('i',), 'o': row.get('o'), 'v': []}
                 if type(row.get('v')) is str:
@@ -51,10 +46,9 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
                 elif type(row.get('v')) is list:
                     rdict['v'].extend(row.get('v'))
                 mquery.append(rdict)   
-                 
-    formquery = mquery
+
     query = {}
-    for row in formquery:
+    for row in mquery:
         operator = row.get('o', None)
         function_path = reg["%s.operation" % operator]
 
@@ -77,7 +71,7 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
                 query[row.index].update(kwargs[row.index])
         else:
             query.update(kwargs)
-                
+
     if not query:
         # If the query is empty fall back onto the equality query
         query = _equal(context, row)
