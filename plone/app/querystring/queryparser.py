@@ -20,6 +20,39 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
 
     # Make sure the things in formquery are dictionaries
     formquery = map(dict, formquery)
+    
+    # Merge  Values
+    mquery = list()
+    for row in formquery:
+        if len(mquery) < 1:
+            rdict = {'i': row.get('i',), 'o': row.get('o'), 'v': []}
+            if type(row.get('v')) is str:
+                rdict['v'].append(row.get('v'))
+            elif type(row.get('v')) is list:
+                rdict['v'].extend(row.get('v'))
+            mquery.append(rdict)
+        else:
+            o_in_mquery = -1
+            counter = 0
+            for mrow in mquery:
+                if row.get('i') == mrow.get('i'):
+                    if row.get('o') == mrow.get('o'):
+                        o_in_mquery = counter
+                counter +=1  
+            if o_in_mquery > -1:
+                if type(row.get('v')) is str:
+                    mquery[o_in_mquery]['v'].append(row.get('v'))
+                elif type(row.get('v')) is list:
+                    mquery[o_in_mquery]['v'].extend(row.get('v'))
+            else:
+                rdict = {'i': row.get('i',), 'o': row.get('o'), 'v': []}
+                if type(row.get('v')) is str:
+                    rdict['v'].append(row.get('v'))
+                elif type(row.get('v')) is list:
+                    rdict['v'].extend(row.get('v'))
+                mquery.append(rdict)   
+                 
+    formquery = mquery
     query = {}
     for row in formquery:
         operator = row.get('o', None)
@@ -30,22 +63,21 @@ def parseFormquery(context, formquery, sort_on=None, sort_order=None):
         row = Row(index=row.get('i', None),
                   operator=function_path,
                   values=row.get('v', None))
-
         kwargs = {}
         parser = resolve(row.operator)
         kwargs = parser(context, row)
+
         # Special path handling - since multipath queries are possible
         if 'path' in query and 'path' in kwargs:
             query['path']['query'].extend(kwargs['path']['query'])
+        # A Index can have more than one operator
+        # For example 'Subject is xxx' and 'Subject is not yyy'
+        elif row.index in query:
+            if kwargs[row.index].keys()[0] not in query[row.index].keys():
+                query[row.index].update(kwargs[row.index])
         else:
-            #query.update(kwargs)
-            if row.operator == u'plone.app.querystring.queryparser._equal' and row.index == 'Subject':
-                if 'Subject' in query:
-                    query['Subject']['query'] = kwargs['Subject']['query']
-                else:
-                    query.update(kwargs)
-            else:
-                query.update(kwargs)
+            query.update(kwargs)
+                
     if not query:
         # If the query is empty fall back onto the equality query
         query = _equal(context, row)
