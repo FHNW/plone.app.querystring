@@ -163,7 +163,7 @@ def _lessThanRelativeDate(context, row):
     """ "Between now and N days from now." """
     # INFO: Values is the number of days
     try:
-        values = int(row.values)
+        values = int(row.values[0])
     except ValueError:
         values = 0
     now = DateTime()
@@ -180,7 +180,7 @@ def _moreThanRelativeDate(context, row):
     """ "Between now and N days ago." """
     # INFO: Values is the number of days
     try:
-        values = int(row.values)
+        values = int(row.values[0])
     except ValueError:
         values = 0
     now = DateTime()
@@ -238,7 +238,7 @@ def _beforeToday(context, row):
 
 
 def _path(context, row):
-    values = row.values
+    values = row.values[0]
     depth = None
     if '::' in values:
         values, _depth = values.split('::', 1)
@@ -269,28 +269,20 @@ def _path(context, row):
 def _relativePath(context, row):
     # Walk through the tree
     obj = context
-    for x in [r for r in row.values.split('/') if r]:
-        if x == "..":
-            if INavigationRoot.providedBy(obj):
-                break
-            parent = aq_parent(obj)
-            if parent:
-                obj = parent
-        else:
-            if base_hasattr(obj, x):
-                child = getattr(obj, x, None)
-                if child and base_hasattr(child, "getPhysicalPath"):
-                    obj = child
-
+    vals = list()
+    navroot = getNavigationRoot(context)
+    try:
+        obj = context.restrictedTraverse(row.values[0])
+        vals.append('/'.join(obj.getPhysicalPath()))
+    except Exception:
+        vals.append('%s/%s' % (navroot, row.values[0]))
     row = Row(index=row.index,
-              operator=row.operator,
-              values='/'.join(obj.getPhysicalPath()))
-
+                  operator=row.operator,
+                  values=vals)
     return _path(context, row)
 
 
 # Helper functions
-
 def getPathByUID(context, uid):
     """Returns the path of an object specified by UID"""
     catalog = getToolByName(context, 'portal_catalog')
