@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.2.1.post1 (unreleased)
+1.2.1.post1 (2016-06-06)
 ------------------------
 
 - Implement `not` query
