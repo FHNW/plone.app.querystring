@@ -1,10 +1,11 @@
 Changelog
 =========
 
-1.2.2 (unreleased)
-------------------
+1.2.1.post1 (unreleased)
+------------------------
 
-- Nothing changed yet.
+- Implement `not` query
+  [mr-rob]
 
 
 1.2.1 (2014-05-14)
